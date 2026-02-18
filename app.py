@@ -27,7 +27,7 @@ class State(TypedDict):
 
 def set_kv(state: State) -> dict:
     """If `to_set` present, merge it into `kv` and return updated state."""
-    print("--- in set_kv node ---" )
+    #PRINT - print("--- in set_kv node ---" )
     kv = dict(state.get("kv", {}))
     to_set = state.get("to_set") or {}
     if to_set:
@@ -41,7 +41,7 @@ def set_kv(state: State) -> dict:
 
 def show_kv(state: State) -> dict:
     """Return state without changes (we'll print result after invoke)."""
-    print("--- in show_kv node ---")
+    #PRINT - print("--- in show_kv node ---")
     return {
         "kv": state.get("kv", {}),
         "_gs_config": state.get("_gs_config"),
@@ -51,7 +51,7 @@ def show_kv(state: State) -> dict:
 
 def interactive_set(state: State) -> dict:
     """No-op placeholder — interactive input is handled in `main()`."""
-    print("--- in interactive_set node ---")
+    #PRINT - print("--- in interactive_set node ---")
     return dict(state)
 
 
@@ -62,10 +62,10 @@ def gs_load_node(state: State) -> dict:
     JSON) and `spreadsheet` (spreadsheet ID), optional `worksheet`.
     """
     global _gs_config_global
-    print("--- in gs_load_node ---")
-    print("state in gs_load_node:", state)
+    #PRINT - print("--- in gs_load_node ---")
+    #PRINT - print("state in gs_load_node:", state)
     cfg = _gs_config_global or {}
-    print("Google Sheets config:", cfg)
+    #PRINT - print("Google Sheets config:", cfg)
     if not cfg.get("creds") or not cfg.get("spreadsheet"):
         return {
             "kv": state.get("kv", {}),
@@ -91,7 +91,7 @@ def gs_load_node(state: State) -> dict:
                 continue
             if len(row) >= 2 and row[0].strip():
                 kv[row[0].strip()] = row[1]
-        print("Loaded KV from Google Sheet:", cfg.get("spreadsheet"))
+        #PRINT - print("Loaded KV from Google Sheet:", cfg.get("spreadsheet"))
         return {
             "kv": kv,
             "_gs_config": state.get("_gs_config"),
@@ -113,8 +113,8 @@ def gs_save_node(state: State) -> dict:
     Requires `_gs_config` in state.
     """
     global _gs_config_global
-    print("--- in gs_save_node ---")
-    print("state in gs_save_node:", state)
+    #PRINT - print("--- in gs_save_node ---")
+    #PRINT - print("state in gs_save_node:", state)
     cfg = _gs_config_global or {}
     if not cfg.get("creds") or not cfg.get("spreadsheet"):
         print("No Google Sheets config provided; skipping save.")
@@ -158,13 +158,10 @@ def gs_save_node(state: State) -> dict:
 
 
 def build_graph() -> StateGraph:
-    print("--- building graph ---")
-    #print("state in build_graph:", State)
+    #PRINT - print("--- building graph ---")
     graph = StateGraph(State)
-    print("graph created", graph)
     # nodes
     graph.add_node("gs_load", gs_load_node)
-    #print("state after gs_load_node:", State)
     graph.add_node("set_kv", set_kv)
     graph.add_node("gs_save", gs_save_node)
     graph.add_node("show_kv", show_kv)
@@ -179,7 +176,7 @@ def build_graph() -> StateGraph:
 
 def main():
     global _gs_config_global, _no_interactive_global
-    print("--- starting main ")
+    #PRINT - print("--- starting main ")
     parser = argparse.ArgumentParser(description="LangGraph KV starter app")
     parser.add_argument("--set", nargs=2, metavar=("KEY", "VALUE"),
                         help="set a key/value pair before running the graph")
@@ -191,12 +188,12 @@ def main():
 
     initial_kv = {"name": "Alice", "role": "developer", "project": "Project D"}
     initial_state: State = {"kv": initial_kv}
-    print("Initial State Definition:", initial_state)
+    #PRINT - print("Initial State Definition:", initial_state)
 
     if args.set:
         k, v = args.set
         initial_state["to_set"] = {k: v}
-        print("Initial State,'to_set:'", initial_state)
+        #PRINT - print("Initial State,'to_set:'", initial_state)
 
     # Google Sheets configuration (optional) — store in global
     if args.gs_creds and args.gs_sheet:
@@ -237,10 +234,11 @@ def main():
 
     graph = build_graph()
     compiled = graph.compile()
-    print("Graph compiled, invoking with initial state:", initial_state)
+    #PRINT - print("Graph compiled, invoking with initial state:", initial_state)
     result = compiled.invoke(initial_state)
 
-    print("*** final KV store ***")
+    print()
+    print("-- final KV store --")
     for kk, vv in result["kv"].items():
         print(f"{kk}: {vv}")
 
