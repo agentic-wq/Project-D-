@@ -10,6 +10,7 @@ This example uses a StateGraph with a small "kv" dict stored in state.
 from typing import Dict
 from typing_extensions import TypedDict
 import argparse
+from dotenv import load_dotenv
 
 from langgraph.graph import START, StateGraph
 import os
@@ -139,7 +140,7 @@ def gs_save_node(state: State) -> dict:
         kv = dict(state.get("kv", {}))
         rows = [["key", "value"]] + [[k, v] for k, v in kv.items()]
         ws.clear()
-        ws.update("A1", rows)
+        ws.update(values=rows, range_name="A1")
         print("Saved KV to Google Sheet:", cfg.get("spreadsheet"))
         return {
             "kv": kv,
@@ -176,6 +177,7 @@ def build_graph() -> StateGraph:
 
 def main():
     global _gs_config_global, _no_interactive_global
+    load_dotenv()
     #PRINT - print("--- starting main ")
     parser = argparse.ArgumentParser(description="LangGraph KV starter app")
     parser.add_argument("--set", nargs=2, metavar=("KEY", "VALUE"),
@@ -196,13 +198,22 @@ def main():
         #PRINT - print("Initial State,'to_set:'", initial_state)
 
     # Google Sheets configuration (optional) — store in global
-    if args.gs_creds and args.gs_sheet:
+    # Check for command line args first, then fall back to environment variables
+    gs_creds = args.gs_creds or os.getenv("GS_CREDS")
+    #PRINT - print(f"gs_creds path: {gs_creds}")
+    home_dir = os.path.expanduser("~")
+    gs_sheet = args.gs_sheet or os.getenv("GS_SHEET")
+    #PRINT - print(f"gs_sheet ID: {gs_sheet}")
+    gs_worksheet = args.gs_worksheet or os.getenv("GS_WORKSHEET", "Sheet1")
+    #PRINT - print(f"gs_worksheet name: {gs_worksheet}") 
+    
+    if gs_creds and gs_sheet:
         _gs_config_global = {
-            "creds": args.gs_creds,
-            "spreadsheet": args.gs_sheet,
-            "worksheet": args.gs_worksheet or "Sheet1",
+            "creds": gs_creds,
+            "spreadsheet": gs_sheet,
+            "worksheet": gs_worksheet,
         }
-        print("_gs_config_global:", _gs_config_global)
+        #PRINT -print("_gs_config_global:", _gs_config_global)
 
     # Interactive prompt handled in main (so LangGraph execution stays non-blocking)
     if not args.no_interactive:
