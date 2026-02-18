@@ -188,7 +188,8 @@ def main():
     parser.add_argument("--no-interactive", action="store_true", help="skip interactive prompts")
     args = parser.parse_args()
 
-    initial_kv = {"name": "Alice", "role": "developer", "project": "Project D"}
+    #initial_kv = {"name": "Alice", "role": "developer", "project": "Project D"}
+    initial_kv = {}
     initial_state: State = {"kv": initial_kv}
     #PRINT - print("Initial State Definition:", initial_state)
 
@@ -231,27 +232,37 @@ def main():
                 continue
             key, val = entry.split(':', 1)
             interactive_pairs[key.strip()] = val.strip()
-            print(f'Added: {key.strip()} = {val.strip()}')
-        if interactive_pairs:
-            existing = initial_state.get('to_set', {})
-            existing.update(interactive_pairs)
-            initial_state['to_set'] = existing
-            print("Initial State,'to_set:'", initial_state)
+        graph = build_graph()
+        compiled = graph.compile()
+        result = compiled.invoke(initial_state)
 
-    if args.no_interactive:
-        _no_interactive_global = True
-        initial_state["_no_interactive"] = True
-        print("Initial State,'_no_interactive:'", initial_state)
+        def _print_fixed_keys_values(d: dict, fixed_keys: list[str], cols: int = 4) -> None:
+            # Create cells containing values only, in order of fixed_keys
+            cells = [str(d.get(k, "")) for k in fixed_keys]
+            if not cells:
+                print("\n-- final KV store --\n(empty)")
+                return
+            rows = (len(cells) + cols - 1) // cols
+            # pad to full grid
+            padded = cells + [""] * (rows * cols - len(cells))
+            col_width = max(len(c) for c in padded + [" "])
+            sep_piece = "+-" + ("-" * col_width) + "-"
+            sep = sep_piece * cols + "+"
+            print()
+            print("-- final KV store --")
+            print(sep)
+            for r in range(rows):
+                row_cells = padded[r * cols:(r + 1) * cols]
+                row_line = ""
+                for c in row_cells:
+                    row_line += f"| {c.ljust(col_width)} "
+                row_line += "|"
+                print(row_line)
+                print(sep)
 
-    graph = build_graph()
-    compiled = graph.compile()
-    #PRINT - print("Graph compiled, invoking with initial state:", initial_state)
-    result = compiled.invoke(initial_state)
-
-    print()
-    print("-- final KV store --")
-    for kk, vv in result["kv"].items():
-        print(f"{kk}: {vv}")
+        # Use fixed 26 keys A..Z (user requested fixed size)
+        fixed_keys = [chr(ord('A') + i) for i in range(26)]
+        _print_fixed_keys_values(result.get("kv", {}), fixed_keys, cols=4)
 
 
 if __name__ == "__main__":
