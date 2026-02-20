@@ -232,8 +232,14 @@ def main():
             print('Please choose option 1, 2, or 3.')
             continue
         if choice == '1':
-            #View ABC - display as table
-            _print_fixed_keys_values(interactive_pairs, fixed_keys, cols=4)
+            #View ABC - load from Google Sheets and display as table
+            temp_state = {"abc": {}}
+            if interactive_pairs:
+                temp_state['to_set'] = interactive_pairs
+            graph = build_graph()
+            compiled = graph.compile()
+            result = compiled.invoke(temp_state)
+            _print_fixed_keys_values(result.get("abc", {}), fixed_keys, cols=4)
         elif choice == '2':
             #Edit ABC
             while True:
