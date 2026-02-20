@@ -17,7 +17,6 @@ import os
 
 # Global config for Google Sheets (workaround for state persistence)
 _gs_config_global = None
-_no_interactive_global = False
 
 
 class State(TypedDict):
@@ -36,7 +35,6 @@ def set_abc(state: State) -> dict:
     return {
         "abc": abc,
         "_gs_config": state.get("_gs_config"),
-        "_no_interactive": state.get("_no_interactive"),
     }
 
 
@@ -46,7 +44,6 @@ def show_abc(state: State) -> dict:
     return {
         "abc": state.get("abc", {}),
         "_gs_config": state.get("_gs_config"),
-        "_no_interactive": state.get("_no_interactive"),
     }
 
 
@@ -71,7 +68,6 @@ def gs_load_node(state: State) -> dict:
         return {
             "abc": state.get("abc", {}),
             "_gs_config": state.get("_gs_config"),
-            "_no_interactive": state.get("_no_interactive"),
         }
     try:
         import gspread
@@ -96,14 +92,12 @@ def gs_load_node(state: State) -> dict:
         return {
             "abc": abc,
             "_gs_config": state.get("_gs_config"),
-            "_no_interactive": state.get("_no_interactive"),
         }
     except Exception as e:
         print("Warning: failed to load from Google Sheets:", e)
         return {
             "abc": state.get("abc", {}),
             "_gs_config": state.get("_gs_config"),
-            "_no_interactive": state.get("_no_interactive"),
         }
 
 
@@ -122,7 +116,6 @@ def gs_save_node(state: State) -> dict:
         return {
             "abc": state.get("abc", {}),
             "_gs_config": state.get("_gs_config"),
-            "_no_interactive": state.get("_no_interactive"),
         }
     try:
         import gspread
@@ -144,7 +137,6 @@ def gs_save_node(state: State) -> dict:
         return {
             "abc": abc,
             "_gs_config": state.get("_gs_config"),
-            "_no_interactive": state.get("_no_interactive"),
         }
     except Exception as e:
         import traceback
@@ -153,7 +145,6 @@ def gs_save_node(state: State) -> dict:
         return {
             "abc": state.get("abc", {}),
             "_gs_config": state.get("_gs_config"),
-            "_no_interactive": state.get("_no_interactive"),
         }
 
 
@@ -175,38 +166,22 @@ def build_graph() -> StateGraph:
 
 
 def main():
-    global _gs_config_global, _no_interactive_global
+    #PRINT011 - print("--- starting main ---")
+    global _gs_config_global
     load_dotenv()
 
-    #PRINT011 - print("--- starting main ---")
     #PRINT018 - print("---CLI Arguments---")
     parser = argparse.ArgumentParser(description="LangGraph ABC starter app")
-    parser.add_argument("--set", nargs=2, metavar=("KEY", "VALUE"),
-                        help="set a key/value pair before running the graph")
     parser.add_argument("--gs-creds", help="path to Google service account JSON credentials")
     parser.add_argument("--gs-sheet", help="Google Sheets spreadsheet ID to load/save")
     parser.add_argument("--gs-worksheet", help="worksheet name (default: Sheet1)")
-    parser.add_argument("--no-interactive", action="store_true", help="skip interactive prompts")
     args = parser.parse_args()
-
-    initial_abc = {}
-    initial_state: State = {"abc": initial_abc}
-    #PRINT012 - print("Initial State Definition:", initial_state)
-
-    if args.set:
-        k, v = args.set
-        initial_state["to_set"] = {k: v}
-    #PRINT013 - print("Initial State,'to_set:'", initial_state)
     
-    # Google Sheets configuration (optional) — store in global
     # Check for command line args first, then fall back to environment variables
     gs_creds = args.gs_creds or os.getenv("GS_CREDS")
-    home_dir = os.path.expanduser("~")
     gs_sheet = args.gs_sheet or os.getenv("GS_SHEET")
     gs_worksheet = args.gs_worksheet or os.getenv("GS_WORKSHEET", "Sheet1")
-    #PRINT014 - print(f"gs_creds path: {gs_creds}")
-    #PRINT015 - print(f"gs_sheet ID: {gs_sheet}")
-    #PRINT016 - print(f"gs_worksheet name: {gs_worksheet}") 
+    #PRINT014 - print(f"gs_creds path: {gs_creds}, gs_sheet ID: {gs_sheet}, gs_worksheet name: {gs_worksheet}") 
     
     if gs_creds and gs_sheet:
         _gs_config_global = {
@@ -214,10 +189,10 @@ def main():
             "spreadsheet": gs_sheet,
             "worksheet": gs_worksheet,
         }
-        #PRINT017 -print("_gs_config_global:", _gs_config_global)
+    #PRINT017 -print("_gs_config_global:", _gs_config_global)
 
-    # Interactive prompt handled in main (so LangGraph execution stays non-blocking)
-    if not args.no_interactive:
+    # Interactive prompt handled in main (always interactive)
+    if True:
         interactive_pairs = {}
         while True:
             print('\nMenu:')
@@ -233,7 +208,7 @@ def main():
                 continue
             if choice == '1':
                 # Quiz (was option 3) — run a quick ABC test using current interactive pairs
-                temp_state = dict(initial_state)
+                temp_state = {"abc": {}}
                 if interactive_pairs:
                     temp_state['to_set'] = interactive_pairs
                 graph = build_graph()
@@ -262,7 +237,7 @@ def main():
                     interactive_pairs[key] = val
             elif choice == '3':
                 # View ABC (was option 1) — show current ABC merged with any interactive pairs (no graph run)
-                temp_abc = dict(initial_state.get('abc', {}))
+                temp_abc = {}
                 if interactive_pairs:
                     temp_abc.update(interactive_pairs)
                 print('\n-- Current ABC --')
@@ -274,13 +249,14 @@ def main():
             else:
                 print('Invalid choice — enter 1, 2, or 3.')
 
-        # merge any interactive pairs into the initial state so graph nodes see them
+        # build base state and merge any interactive pairs so graph nodes see them
+        base_state = {"abc": {}}
         if interactive_pairs:
-            initial_state['to_set'] = interactive_pairs
+            base_state['to_set'] = interactive_pairs
 
         graph = build_graph()
         compiled = graph.compile()
-        result = compiled.invoke(initial_state)
+        result = compiled.invoke(base_state)
 
         def _print_fixed_keys_values(d: dict, fixed_keys: list[str], cols: int = 4) -> None:
             # Create cells containing values only, in order of fixed_keys
