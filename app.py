@@ -206,22 +206,18 @@ def main():
             print('Please choose option 1, 2, or 3.')
             continue
         if choice == '1':
-            # Quiz (was option 3) — run a quick ABC test using current interactive pairs
-            temp_state = {"abc": {}}
+            #View ABC
+            temp_abc = {}
             if interactive_pairs:
-                temp_state['to_set'] = interactive_pairs
-            graph = build_graph()
-            compiled = graph.compile()
-            result = compiled.invoke(temp_state)
-            print('\n-- Quiz result --')
-            abc_out = result.get('abc', {})
-            if not abc_out:
+                temp_abc.update(interactive_pairs)
+            print('\n-- Current ABC --')
+            if not temp_abc:
                 print('(empty)')
             else:
-                for k, v in abc_out.items():
+                for k, v in temp_abc.items():
                     print(f'{k}: {v}')
         elif choice == '2':
-            # Edit ABC (previously Update ABC)
+            #Edit ABC
             while True:
                 try:
                     key = input('Key to set (blank to finish): ').strip()
@@ -235,7 +231,7 @@ def main():
                     val = ""
                 interactive_pairs[key] = val
         elif choice == '3':
-            # View ABC (was option 1) — show current ABC merged with any interactive pairs (no graph run)
+            #Quiz
             temp_abc = {}
             if interactive_pairs:
                 temp_abc.update(interactive_pairs)
