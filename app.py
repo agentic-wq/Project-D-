@@ -191,8 +191,34 @@ def main():
         }
     #PRINT017 -print("_gs_config_global:", _gs_config_global)
 
+    # Define table display function
+    def _print_fixed_keys_values(d: dict, fixed_keys: list[str], cols: int = 4) -> None:
+        # Create cells containing values only, in order of fixed_keys
+        cells = [str(d.get(k, "")) for k in fixed_keys]
+        if not cells:
+            print("\n-- ABC store --\n(empty)")
+            return
+        rows = (len(cells) + cols - 1) // cols
+        # pad to full grid
+        padded = cells + [""] * (rows * cols - len(cells))
+        col_width = max(len(c) for c in padded + [" "])
+        sep_piece = "+-" + ("-" * col_width) + "-"
+        sep = sep_piece * cols + "+"
+        print()
+        print("-- ABC store --")
+        print(sep)
+        for r in range(rows):
+            row_cells = padded[r * cols:(r + 1) * cols]
+            row_line = ""
+            for c in row_cells:
+                row_line += f"| {c.ljust(col_width)} "
+            row_line += "|"
+            print(row_line)
+            print(sep)
+
     # Interactive prompt handled in main (always interactive)
     interactive_pairs = {}
+    fixed_keys = [chr(ord('A') + i) for i in range(26)]
     while True:
         print('\nMenu:')
         print('1. View ABC')
@@ -206,16 +232,8 @@ def main():
             print('Please choose option 1, 2, or 3.')
             continue
         if choice == '1':
-            #View ABC
-            temp_abc = {}
-            if interactive_pairs:
-                temp_abc.update(interactive_pairs)
-            print('\n-- Current ABC --')
-            if not temp_abc:
-                print('(empty)')
-            else:
-                for k, v in temp_abc.items():
-                    print(f'{k}: {v}')
+            #View ABC - display as table
+            _print_fixed_keys_values(interactive_pairs, fixed_keys, cols=4)
         elif choice == '2':
             #Edit ABC
             while True:
@@ -252,34 +270,6 @@ def main():
     graph = build_graph()
     compiled = graph.compile()
     result = compiled.invoke(base_state)
-
-    def _print_fixed_keys_values(d: dict, fixed_keys: list[str], cols: int = 4) -> None:
-        # Create cells containing values only, in order of fixed_keys
-        cells = [str(d.get(k, "")) for k in fixed_keys]
-        if not cells:
-            print("\n-- final ABC store --\n(empty)")
-            return
-        rows = (len(cells) + cols - 1) // cols
-        # pad to full grid
-        padded = cells + [""] * (rows * cols - len(cells))
-        col_width = max(len(c) for c in padded + [" "])
-        sep_piece = "+-" + ("-" * col_width) + "-"
-        sep = sep_piece * cols + "+"
-        print()
-        print("-- final ABC store --")
-        print(sep)
-        for r in range(rows):
-            row_cells = padded[r * cols:(r + 1) * cols]
-            row_line = ""
-            for c in row_cells:
-                row_line += f"| {c.ljust(col_width)} "
-            row_line += "|"
-            print(row_line)
-            print(sep)
-
-    # Use fixed 26 keys A..Z (user requested fixed size)
-    fixed_keys = [chr(ord('A') + i) for i in range(26)]
-    _print_fixed_keys_values(result.get("abc", {}), fixed_keys, cols=4)
 
 
 if __name__ == "__main__":
