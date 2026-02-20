@@ -192,99 +192,98 @@ def main():
     #PRINT017 -print("_gs_config_global:", _gs_config_global)
 
     # Interactive prompt handled in main (always interactive)
-    if True:
-        interactive_pairs = {}
-        while True:
-            print('\nMenu:')
-            print('1. View ABC')
-            print('2. Edit ABC')
-            print('3. Quiz')
-            try:
-                choice = input('Choose option (1/2/3): ').strip()
-            except EOFError:
-                break
-            if not choice:
-                print('Please choose option 1, 2, or 3.')
-                continue
-            if choice == '1':
-                # Quiz (was option 3) — run a quick ABC test using current interactive pairs
-                temp_state = {"abc": {}}
-                if interactive_pairs:
-                    temp_state['to_set'] = interactive_pairs
-                graph = build_graph()
-                compiled = graph.compile()
-                result = compiled.invoke(temp_state)
-                print('\n-- Quiz result --')
-                abc_out = result.get('abc', {})
-                if not abc_out:
-                    print('(empty)')
-                else:
-                    for k, v in abc_out.items():
-                        print(f'{k}: {v}')
-            elif choice == '2':
-                # Edit ABC (previously Update ABC)
-                while True:
-                    try:
-                        key = input('Key to set (blank to finish): ').strip()
-                    except EOFError:
-                        break
-                    if not key:
-                        break
-                    try:
-                        val = input(f'Value for "{key}": ').strip()
-                    except EOFError:
-                        val = ""
-                    interactive_pairs[key] = val
-            elif choice == '3':
-                # View ABC (was option 1) — show current ABC merged with any interactive pairs (no graph run)
-                temp_abc = {}
-                if interactive_pairs:
-                    temp_abc.update(interactive_pairs)
-                print('\n-- Current ABC --')
-                if not temp_abc:
-                    print('(empty)')
-                else:
-                    for k, v in temp_abc.items():
-                        print(f'{k}: {v}')
+    interactive_pairs = {}
+    while True:
+        print('\nMenu:')
+        print('1. View ABC')
+        print('2. Edit ABC')
+        print('3. Quiz')
+        try:
+            choice = input('Choose option (1/2/3): ').strip()
+        except EOFError:
+            break
+        if not choice:
+            print('Please choose option 1, 2, or 3.')
+            continue
+        if choice == '1':
+            # Quiz (was option 3) — run a quick ABC test using current interactive pairs
+            temp_state = {"abc": {}}
+            if interactive_pairs:
+                temp_state['to_set'] = interactive_pairs
+            graph = build_graph()
+            compiled = graph.compile()
+            result = compiled.invoke(temp_state)
+            print('\n-- Quiz result --')
+            abc_out = result.get('abc', {})
+            if not abc_out:
+                print('(empty)')
             else:
-                print('Invalid choice — enter 1, 2, or 3.')
+                for k, v in abc_out.items():
+                    print(f'{k}: {v}')
+        elif choice == '2':
+            # Edit ABC (previously Update ABC)
+            while True:
+                try:
+                    key = input('Key to set (blank to finish): ').strip()
+                except EOFError:
+                    break
+                if not key:
+                    break
+                try:
+                    val = input(f'Value for "{key}": ').strip()
+                except EOFError:
+                    val = ""
+                interactive_pairs[key] = val
+        elif choice == '3':
+            # View ABC (was option 1) — show current ABC merged with any interactive pairs (no graph run)
+            temp_abc = {}
+            if interactive_pairs:
+                temp_abc.update(interactive_pairs)
+            print('\n-- Current ABC --')
+            if not temp_abc:
+                print('(empty)')
+            else:
+                for k, v in temp_abc.items():
+                    print(f'{k}: {v}')
+        else:
+            print('Invalid choice — enter 1, 2, or 3.')
 
-        # build base state and merge any interactive pairs so graph nodes see them
-        base_state = {"abc": {}}
-        if interactive_pairs:
-            base_state['to_set'] = interactive_pairs
+    # build base state and merge any interactive pairs so graph nodes see them
+    base_state = {"abc": {}}
+    if interactive_pairs:
+        base_state['to_set'] = interactive_pairs
 
-        graph = build_graph()
-        compiled = graph.compile()
-        result = compiled.invoke(base_state)
+    graph = build_graph()
+    compiled = graph.compile()
+    result = compiled.invoke(base_state)
 
-        def _print_fixed_keys_values(d: dict, fixed_keys: list[str], cols: int = 4) -> None:
-            # Create cells containing values only, in order of fixed_keys
-            cells = [str(d.get(k, "")) for k in fixed_keys]
-            if not cells:
-                print("\n-- final ABC store --\n(empty)")
-                return
-            rows = (len(cells) + cols - 1) // cols
-            # pad to full grid
-            padded = cells + [""] * (rows * cols - len(cells))
-            col_width = max(len(c) for c in padded + [" "])
-            sep_piece = "+-" + ("-" * col_width) + "-"
-            sep = sep_piece * cols + "+"
-            print()
-            print("-- final ABC store --")
+    def _print_fixed_keys_values(d: dict, fixed_keys: list[str], cols: int = 4) -> None:
+        # Create cells containing values only, in order of fixed_keys
+        cells = [str(d.get(k, "")) for k in fixed_keys]
+        if not cells:
+            print("\n-- final ABC store --\n(empty)")
+            return
+        rows = (len(cells) + cols - 1) // cols
+        # pad to full grid
+        padded = cells + [""] * (rows * cols - len(cells))
+        col_width = max(len(c) for c in padded + [" "])
+        sep_piece = "+-" + ("-" * col_width) + "-"
+        sep = sep_piece * cols + "+"
+        print()
+        print("-- final ABC store --")
+        print(sep)
+        for r in range(rows):
+            row_cells = padded[r * cols:(r + 1) * cols]
+            row_line = ""
+            for c in row_cells:
+                row_line += f"| {c.ljust(col_width)} "
+            row_line += "|"
+            print(row_line)
             print(sep)
-            for r in range(rows):
-                row_cells = padded[r * cols:(r + 1) * cols]
-                row_line = ""
-                for c in row_cells:
-                    row_line += f"| {c.ljust(col_width)} "
-                row_line += "|"
-                print(row_line)
-                print(sep)
 
-        # Use fixed 26 keys A..Z (user requested fixed size)
-        fixed_keys = [chr(ord('A') + i) for i in range(26)]
-        _print_fixed_keys_values(result.get("abc", {}), fixed_keys, cols=4)
+    # Use fixed 26 keys A..Z (user requested fixed size)
+    fixed_keys = [chr(ord('A') + i) for i in range(26)]
+    _print_fixed_keys_values(result.get("abc", {}), fixed_keys, cols=4)
 
 
 if __name__ == "__main__":
