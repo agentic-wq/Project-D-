@@ -1,4 +1,4 @@
-# LangGraph KV Starter (Python)
+# LangGraph ABC Starter (Python)           
 
 A minimal LangGraph CLI that preloads a small key/value store into the graph state.
 
@@ -16,8 +16,8 @@ Usage
 
 What it does
 ------------
-- Preloads `kv` with: `name: Alice`, `role: developer`, `project: Project D`.
-- Graph nodes merge any `to_set` values into the `kv` store and then print the final store.
+- Preloads `abc` with: `name: Alice`, `role: developer`, `project: Project D`.
+- Graph nodes merge any `to_set` values into the `abc` store and then print the final store.
 
 Files
 -----
@@ -32,7 +32,15 @@ To enable saving/loading to Google Sheets, provide a service account credentials
 python app.py --gs-creds path/to/creds.json --gs-sheet your_spreadsheet_id
 ```
 
-The app will load existing key/value pairs (two-column sheet) into the graph at start and overwrite the sheet with the final `kv` content at the end.
+The app will load existing key/value pairs (two-column sheet) into the graph at start and overwrite the sheet with the final `abc` content at the end.
+
+By default, writes do **not** overwrite an existing worksheet tab. The app creates a new worksheet tab name when saving/importing data. To explicitly allow overwrite of the configured worksheet, pass:
+
+```bash
+python app.py --gs-creds path/to/creds.json --gs-sheet your_spreadsheet_id --gs-worksheet Sheet1 --gs-overwrite
+```
+
+You can also set `GS_OVERWRITE=true` in the environment.
 
 Notes
 -----
