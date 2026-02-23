@@ -14,6 +14,16 @@ Usage
    python app.py
    python app.py --set color blue
 
+Web UI
+------
+You can run a browser-based frontend for worksheet management, ABC operations, quiz, and quiz results:
+
+```bash
+streamlit run web_app.py
+```
+
+The Web UI uses the same Google Sheets environment variables (`GS_CREDS`, `GS_SHEET`, optional `GS_WORKSHEET`).
+
 What it does
 ------------
 - Preloads `abc` with: `name: Alice`, `role: developer`, `project: Project D`.
@@ -22,6 +32,7 @@ What it does
 Files
 -----
 - `app.py` — example LangGraph `StateGraph` with preloaded key/value pairs.
+- `web_app.py` — Streamlit frontend for the Project D workflows.
 - `requirements.txt` — lists `langgraph`.
 
 Google Sheets persistence

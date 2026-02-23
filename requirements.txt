@@ -4,3 +4,4 @@ google-auth>=2.20.0
 python-dotenv>=1.0.0
 selenium>=4.10.0
 webdriver-manager>=3.8.6
+streamlit>=1.38.0
