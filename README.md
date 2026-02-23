@@ -22,7 +22,28 @@ You can run a browser-based frontend for worksheet management, ABC operations, q
 streamlit run web_app.py
 ```
 
+Or on Windows PowerShell, run the one-command launcher:
+
+```powershell
+.\run_web.ps1
+```
+
 The Web UI uses the same Google Sheets environment variables (`GS_CREDS`, `GS_SHEET`, optional `GS_WORKSHEET`).
+
+Web UI Screenshots
+------------------
+Add screenshots to `docs/screenshots/` and keep these names for automatic display in this section:
+
+- `menu-overview.png`
+- `worksheet-management.png`
+- `quiz-flow.png`
+- `quiz-results.png`
+
+<!-- Replace placeholders below once image files exist -->
+![Web UI - Menu Overview](docs/screenshots/menu-overview.png)
+![Web UI - Worksheet Management](docs/screenshots/worksheet-management.png)
+![Web UI - Quiz Flow](docs/screenshots/quiz-flow.png)
+![Web UI - Quiz Results](docs/screenshots/quiz-results.png)
 
 What it does
 ------------
