@@ -1,0 +1,7 @@
+digraph "packages_project_d" {
+rankdir=BT
+charset="utf-8"
+"app" [color="black", label=<app>, shape="box", style="solid"];
+"web_app" [color="black", label=<web_app>, shape="box", style="solid"];
+"web_app" -> "app" [arrowhead="open", arrowtail="none"];
+}

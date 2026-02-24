@@ -1,6 +1,6 @@
-# LangGraph ABC Starter (Python)           
+# Project D Web UI
 
-A minimal LangGraph CLI that preloads a small key/value store into the graph state.
+A Streamlit web UI for worksheet management, ABC operations, quiz, and quiz results backed by Google Sheets.
 
 Usage
 -----
@@ -8,11 +8,6 @@ Usage
 2. Install dependencies:
 
    pip install -r requirements.txt
-
-3. Run:
-
-   python app.py
-   python app.py --set color blue
 
 Web UI
 ------
@@ -45,35 +40,69 @@ Add screenshots to `docs/screenshots/` and keep these names for automatic displa
 ![Web UI - Quiz Flow](docs/screenshots/quiz-flow.png)
 ![Web UI - Quiz Results](docs/screenshots/quiz-results.png)
 
-What it does
-------------
-- Preloads `abc` with: `name: Alice`, `role: developer`, `project: Project D`.
-- Graph nodes merge any `to_set` values into the `abc` store and then print the final store.
+Diagrams
+--------
+High-level flow (Web UI + Google Sheets + Google Maps):
+
+```mermaid
+flowchart TD
+   subgraph User
+      U[User]
+   end
+
+   subgraph WebUI
+      UI[web_app.py Streamlit]
+      Worksheet[Worksheet Management]
+      ABC[ABC CRUD]
+      QuizUI[Quiz Flow]
+      ResultsUI[Quiz Results]
+   end
+
+   subgraph External
+      Sheets[Google Sheets]
+      Maps[Google Maps]
+   end
+
+   U --> UI
+
+   UI --> Worksheet --> Sheets
+   UI --> ABC --> Sheets
+   UI --> QuizUI --> Sheets
+   UI --> ResultsUI --> Sheets
+```
+
+Generated diagram sources (Graphviz DOT):
+- [docs/diagrams/high_level_flow.mmd](docs/diagrams/high_level_flow.mmd)
+- [docs/diagrams/call_graph.dot](docs/diagrams/call_graph.dot)
+- [docs/diagrams/packages.dot](docs/diagrams/packages.dot)
+- [docs/diagrams/classes.dot](docs/diagrams/classes.dot)
+
+Rendered diagrams (SVG):
+- [docs/diagrams/call_graph.svg](docs/diagrams/call_graph.svg)
+- [docs/diagrams/packages.svg](docs/diagrams/packages.svg)
+- [docs/diagrams/classes.svg](docs/diagrams/classes.svg)
 
 Files
 -----
-- `app.py` — example LangGraph `StateGraph` with preloaded key/value pairs.
+- `app.py` — shared Google Maps scraping utility used by the Web UI.
 - `web_app.py` — Streamlit frontend for the Project D workflows.
-- `requirements.txt` — lists `langgraph`.
+- `requirements.txt` — Python dependencies.
 
 Google Sheets persistence
 -------------------------
-To enable saving/loading to Google Sheets, provide a service account credentials JSON and the spreadsheet ID. Share the spreadsheet with the service account email. Then run:
+To enable saving/loading to Google Sheets, provide a service account credentials JSON and the spreadsheet ID. Share the spreadsheet with the service account email, then set environment variables for the Web UI:
 
 ```bash
-python app.py --gs-creds path/to/creds.json --gs-sheet your_spreadsheet_id
+setx GS_CREDS "path\to\creds.json"
+setx GS_SHEET "your_spreadsheet_id"
 ```
 
-The app will load existing key/value pairs (two-column sheet) into the graph at start and overwrite the sheet with the final `abc` content at the end.
-
-By default, writes do **not** overwrite an existing worksheet tab. The app creates a new worksheet tab name when saving/importing data. To explicitly allow overwrite of the configured worksheet, pass:
+Optional:
 
 ```bash
-python app.py --gs-creds path/to/creds.json --gs-sheet your_spreadsheet_id --gs-worksheet Sheet1 --gs-overwrite
+setx GS_WORKSHEET "Sheet1"
 ```
-
-You can also set `GS_OVERWRITE=true` in the environment.
 
 Notes
 -----
-This is a minimal starting point — tell me if you want persistence, an HTTP API, or extra nodes for read/write operations.
+This project is web-UI-only. The legacy CLI has been removed.

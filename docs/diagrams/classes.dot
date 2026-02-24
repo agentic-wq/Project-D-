@@ -1,0 +1,5 @@
+digraph "classes_project_d" {
+rankdir=BT
+charset="utf-8"
+"app.State" [color="black", fontcolor="black", label=<{State|abc : Dict[str, str]<br ALIGN="LEFT"/>to_set : Dict[str, str]<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+}

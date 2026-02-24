@@ -1,0 +1,24 @@
+flowchart TD
+    subgraph User
+        U[User]
+    end
+
+    subgraph WebUI
+        UI[web_app.py Streamlit]
+        Worksheet[Worksheet Management]
+        ABC[ABC CRUD]
+        QuizUI[Quiz Flow]
+        ResultsUI[Quiz Results]
+    end
+
+    subgraph External
+        Sheets[Google Sheets]
+        Maps[Google Maps]
+    end
+
+    U --> UI
+
+    UI --> Worksheet --> Sheets
+    UI --> ABC --> Sheets
+    UI --> QuizUI --> Sheets
+    UI --> ResultsUI --> Sheets
